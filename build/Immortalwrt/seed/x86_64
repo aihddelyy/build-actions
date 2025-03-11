@@ -147,8 +147,10 @@ CONFIG_PACKAGE_kmod-nf-conncount=y
 CONFIG_PACKAGE_kmod-nf-ipt=y
 CONFIG_PACKAGE_kmod-nf-ipt6=y
 CONFIG_PACKAGE_kmod-nf-socket=y
+CONFIG_PACKAGE_kmod-nf-tproxy=y
 CONFIG_PACKAGE_kmod-nft-compat=y
 CONFIG_PACKAGE_kmod-nft-socket=y
+CONFIG_PACKAGE_kmod-nft-tproxy=y
 CONFIG_PACKAGE_kmod-oaf=y
 CONFIG_PACKAGE_kmod-sit=y
 CONFIG_PACKAGE_kmod-tun=y
@@ -213,9 +215,9 @@ CONFIG_PACKAGE_luci-app-diskman=y
 CONFIG_PACKAGE_luci-app-mosdns=y
 CONFIG_PACKAGE_luci-app-nikki=y
 CONFIG_PACKAGE_luci-app-onliner=y
-CONFIG_PACKAGE_luci-app-openclash=y
 CONFIG_PACKAGE_luci-app-partexp=y
 CONFIG_PACKAGE_luci-app-passwall=y
+CONFIG_PACKAGE_luci-app-passwall_INCLUDE_Geoview=y
 CONFIG_PACKAGE_luci-app-passwall_INCLUDE_Haproxy=y
 CONFIG_PACKAGE_luci-app-passwall_INCLUDE_Shadowsocks_Rust_Client=y
 CONFIG_PACKAGE_luci-app-passwall_INCLUDE_Shadowsocks_Rust_Server=y
@@ -337,7 +339,6 @@ CONFIG_PACKAGE_shadowsocks-rust-ssmanager=y
 CONFIG_PACKAGE_shadowsocks-rust-ssserver=y
 CONFIG_PACKAGE_shadowsocks-rust-ssservice=y
 CONFIG_PACKAGE_shadowsocks-rust-ssurl=y
-CONFIG_PACKAGE_simple-obfs=y
 CONFIG_PACKAGE_sing-box=y
 CONFIG_PACKAGE_smartd=y
 CONFIG_PACKAGE_smartmontools=y
@@ -368,13 +369,14 @@ CONFIG_PARTED_READLINE=y
 CONFIG_PHP8_LIBXML=y
 CONFIG_PHP8_SYSTEMTZDATA=y
 CONFIG_RUBY_ENABLE_YJIT=y
-CONFIG_SING_BOX_WITH_CLASH_API=y
-CONFIG_SING_BOX_WITH_DHCP=y
-CONFIG_SING_BOX_WITH_ECH=y
-CONFIG_SING_BOX_WITH_GVISOR=y
-CONFIG_SING_BOX_WITH_QUIC=y
-CONFIG_SING_BOX_WITH_UTLS=y
-CONFIG_SING_BOX_WITH_WIREGUARD=y
+CONFIG_SING_BOX_BUILD_ACME=y
+CONFIG_SING_BOX_BUILD_CLASH_API=y
+CONFIG_SING_BOX_BUILD_ECH=y
+CONFIG_SING_BOX_BUILD_GVISOR=y
+CONFIG_SING_BOX_BUILD_QUIC=y
+CONFIG_SING_BOX_BUILD_REALITY_SERVER=y
+CONFIG_SING_BOX_BUILD_UTLS=y
+CONFIG_SING_BOX_BUILD_WIREGUARD=y
 CONFIG_SQLITE3_COLUMN_METADATA=y
 CONFIG_SQLITE3_DYNAMIC_EXTENSIONS=y
 CONFIG_SQLITE3_FTS3=y
@@ -393,6 +395,7 @@ CONFIG_shadow-all=y
 # CONFIG_PACKAGE_luci-app-passwall_INCLUDE_Shadowsocks_Libev_Server is not set
 # CONFIG_PACKAGE_luci-app-passwall_INCLUDE_V2ray_Plugin is not set
 # CONFIG_PACKAGE_luci-app-passwall_INCLUDE_Xray is not set
+# CONFIG_PACKAGE_shadowsocks-libev-config is not set
 # CONFIG_PACKAGE_shadowsocks-libev-ss-local is not set
 # CONFIG_PACKAGE_shadowsocks-libev-ss-redir is not set
 # CONFIG_PACKAGE_shadowsocks-libev-ss-server is not set
