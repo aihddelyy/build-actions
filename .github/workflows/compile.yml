@@ -49,16 +49,6 @@ jobs:
         fi
         source ${GITHUB_WORKSPACE}/build/${{ env.FOLDER_NAME }}/common.sh && Diy_menu1
 
-    - name: 清理因转换CPU而停止的工作流程
-      run: |
-        cd ${GITHUB_WORKSPACE}
-        source build/${FOLDER_NAME}/common.sh && Diy_delruns
-
-    - name: CPU检测
-      run: |
-        cd ${GITHUB_WORKSPACE}
-        source build/${FOLDER_NAME}/common.sh && CPU_Priority
-
     - name: 释放Ubuntu磁盘空间
       uses: danshui-git/free-disk-space@main
       with:
@@ -182,7 +172,22 @@ jobs:
         allowUpdates: true
         body: ${{ env.Tongzhi_Date }}
         artifacts: "${{ env.FIRMWARE_PATH }}/*"
-        
+    
+    - name: 清理在线更新旧固件
+      shell: bash
+      run: |
+        cd ${GITHUB_WORKSPACE}
+        if [[ -f "del_assets" ]]; then
+           chmod +x "del_assets"
+           source "del_assets"
+           if [[ -n "${BOOT_TYPE}" ]]; then
+              bash <(curl -fsSL https://raw.githubusercontent.com/aihddelyy/common/main/custom/assets.sh)
+           fi
+           if [[ -n "${BOOT_UEFI}" ]]; then
+              BOOT_TYPE="${BOOT_UEFI}"
+              bash <(curl -fsSL https://raw.githubusercontent.com/aihddelyy/common/main/custom/assets.sh)
+           fi
+        fi
     - name: 发送[在线更新固件]至云端1
       id: autoup
       if: steps.compile.outcome == 'success' && env.UPDATE_FIRMWARE_ONLINE == 'true' && env.REPO_TOKEN
