@@ -29,7 +29,7 @@ on:
         type: choice
         options:
           - 'x86_64'
-          - 'aarch64'
+          - 'armsr_rootfs_tar_gz'
       INFORMATION_NOTICE:
         description: 'Telegram或pushplus信息通知'
         required: true
@@ -39,10 +39,14 @@ on:
           - '关闭'
           - 'Telegram'
           - 'Pushplus'
-      RETAIN_MINUTE:
-        description: '清理[X]分钟之后的所有操作记录(最低30)'
+      KEEP_WORKFLOWS:
+        description: '清理workflows,保留[X]个runs不被清理'
         required: true
-        default: '10080'
+        default: '30'
+      KEEP_RELESAES:
+        description: '清理Releases,保留[X]个Releases不被清理'
+        required: true
+        default: '30'
       SSH_ACTION:
         description: 'SSH远程配置固件'
         required: false
@@ -64,12 +68,7 @@ on:
         default: 'true'
         type: boolean
       UPDATE_FIRMWARE_ONLINE:
-        description: '增加在线更新固件功能/自动打包Amlogic_Rockchip系列固件'
-        required: false
-        default: 'true'
-        type: boolean
-      COMPILATION_INFORMATION:
-        description: '是否显示编译信息'
+        description: '在线更新固/打包aarch64系列为img固件'
         required: false
         default: 'true'
         type: boolean
@@ -83,8 +82,6 @@ env:
   GITHUB_LINK: https://github.com/${{github.repository}}
   GIT_ACTOR: ${{github.actor}}
   GIT_REPOSITORY: ${{github.repository}}
-  RUN_NUMBER: ${{github.run_number}}
-  RUN_WORKFLOW: ${{github.workflow}}
   REPO_TOKEN: ${{ secrets.REPO_TOKEN }}
   PUSH_PLUS_TOKEN: ${{ secrets.PUSH_PLUS_TOKEN }}
   TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
@@ -205,26 +202,20 @@ jobs:
         cd openwrt
         source ${BUILD_PATH}/common.sh && Diy_xinxi
     
-    - name: 清理Actions空间
+    - name: 清理releases和workflows
       continue-on-error: true
-      if: env.REPO_TOKEN
-      uses: small-5/delete-workflow-runs@main
-      with:
-        token: ${{ secrets.REPO_TOKEN }}
-        repository: ${{ github.repository }}
-        retain_min: ${{ env.RETAIN_MINUTE }}
-    
-    - name: 清理releases
-      continue-on-error: true
-      if: env.REPO_TOKEN
-      uses: ophub/delete-releases-workflows@main
+      uses: danshui-git/delete-releases-workflows@main
       with:
         delete_releases: true
+        prerelease_option: all
         releases_keep_keyword: targz/Update
-        releases_keep_latest: ${{ env.KEEP_LATEST }}
+        releases_keep_latest: ${{ env.KEEP_RELESAES }}
         delete_tags: true
-        delete_workflows: false
-        workflows_keep_day: 90
+        max_releases_fetch: 300
+        delete_workflows: true
+        workflows_keep_latest: ${{ env.KEEP_WORKFLOWS }}
+        max_workflows_fetch: 300
+        repo: ${{ github.repository }}
         gh_token: ${{ secrets.REPO_TOKEN }}
         
     - name: 触发启动"${{ matrix.target }}"开始编译
