@@ -124,7 +124,7 @@ jobs:
         export INPUTS_REPO_BRANCH="${{ github.event.inputs.REPO_BRANCH }}"
         export INPUTS_CONFIG_FILE="${{ github.event.inputs.CONFIG_FILE }}"
         export INPUTS_KEEP_WORKFLOWS="${{ github.event.inputs.KEEP_WORKFLOWS }}"
-        export INPUTS_KEEP_RELESAES="${{ github.event.inputs.KEEP_RELESAES }}"
+        export INPUTS_KEEP_RELEASES="${{ github.event.inputs.KEEP_RELEASES }}"
         export INPUTS_INFORMATION_NOTICE="${{ github.event.inputs.INFORMATION_NOTICE }}"
         export INPUTS_SSH_ACTION="${{ github.event.inputs.SSH_ACTION }}"
         export INPUTS_UPLOAD_FIRMWARE="${{ github.event.inputs.UPLOAD_FIRMWARE }}"
