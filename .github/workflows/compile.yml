@@ -174,14 +174,15 @@ jobs:
         artifacts: "${{ env.FIRMWARE_PATH }}/*"
     
     - name: 清理在线更新旧固件
-      shell: bash
       run: |
         cd ${GITHUB_WORKSPACE}
         if [[ -f "del_assets" ]]; then
           cat "del_assets"
           chmod +x "del_assets"
-          source "del_assets"          
-          bash <(curl -fsSL https://raw.githubusercontent.com/aihddelyy/common/main/custom/assets.sh)          
+          source "del_assets" 
+          curl -o assets.sh https://raw.githubusercontent.com/aihddelyy/common/main/custom/assets.sh
+          chmod +x assets.sh
+          source assets.sh
         fi
     - name: 发送[在线更新固件]至云端1
       id: autoup
