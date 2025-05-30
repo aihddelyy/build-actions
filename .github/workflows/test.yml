@@ -9,7 +9,7 @@
 #
 #
 
-name: Immortalwrt-天灵
+name: 清理在线更新旧固件
 on:
   workflow_dispatch:
 
