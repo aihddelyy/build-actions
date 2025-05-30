@@ -1,0 +1,58 @@
+#
+# 请大家记住拉取的是我的 281677160/build-actions 仓库，拉取的是其他仓库有问题，别问我，我也不清楚什么问题
+#
+# 因为SSH连接配置固件直接编译，会给github停止编译的,所以要另外触发启动编译程序
+#
+# 一般情况下都能触发启动编译的，除非没设置好密匙，或者密匙过期了，或者密匙错误之类的
+#
+# REPO_TOKEN密匙制作教程：https://git.io/jm.md
+#
+#
+
+name: Immortalwrt-天灵
+on:
+  workflow_dispatch:
+
+
+# 定时触发开启开始编译(把下面两个#去掉开启,时间设置请看定时开启编译说明)
+  schedule:
+    - cron: 0 14 * * *
+
+env:
+  GITHUB_LINK: https://github.com/${{github.repository}}
+  GIT_ACTOR: ${{github.actor}}
+  GIT_REPOSITORY: ${{github.repository}}
+  REPO_TOKEN: ${{ secrets.REPO_TOKEN }}
+  PUSH_PLUS_TOKEN: ${{ secrets.PUSH_PLUS_TOKEN }}
+  TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+  TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+  TZ: Asia/Shanghai
+
+jobs:
+  build:
+    name: 清理在线更新旧固件
+    runs-on: ubuntu-22.04
+    if: ${{ github.event.repository.owner.id }} == ${{ github.event.sender.id }}
+    
+    env:
+      FOLDER_NAME: ${{ matrix.target }}
+      UPDATE_TAG: "Update-x86"
+      BOOT_TYPE: "legacy"
+      FIRMWARE_SUFFIX: ".img.gz"
+      FIRMWARE_PROFILEER: "24.10-Immortalwrt-x86-64"
+      BOOT_UEFI: "uefi"
+    
+    strategy:
+      fail-fast: false
+      matrix:
+        target: [Immortalwrt]
+        
+        # 请勿对 target: [Immortalwrt] 做任何修改
+        
+    steps:
+    - name: 清理在线更新旧固件
+      run: |
+        cd ${GITHUB_WORKSPACE}
+        curl -o assets.sh https://raw.githubusercontent.com/aihddelyy/common/main/custom/assets.sh
+        chmod +x assets.sh
+        source assets.sh
