@@ -183,7 +183,7 @@ jobs:
     
     - name: SSH远程连接（make menuconfig）
       if: env.SSH_ACTION == 'true'
-      uses: owenthereal/action-upterm@v1.13.0
+      uses: danshui-git/debugger-action@main
       with:
         telegaram_token: ${{ env.TELEGRAM_BOT_TOKEN }}
         telegaram_id: ${{ env.TELEGRAM_CHAT_ID }}
