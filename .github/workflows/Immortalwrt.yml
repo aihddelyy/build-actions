@@ -183,45 +183,43 @@ jobs:
     
     - name: SSH远程连接（make menuconfig）
       if: env.SSH_ACTION == 'true'
-      env:
-        NGROK_TOKEN: ${{ secrets.NGROK_AUTH_TOKEN }}
-        USER_PASS: mypassword123
       run: |
-        # 1. 安装 Ngrok
-        curl -s https://ngrok-agent.s3.amazonaws.com/ngrok.asc | sudo tee /etc/apt/trusted.gpg.d/ngrok.asc >/dev/null
-        echo "deb https://ngrok-agent.s3.amazonaws.com buster main" | sudo tee /etc/apt/sources.list.d/ngrok.list
-        sudo apt-get update && sudo apt-get install ngrok
-
-        # 2. 配置 SSH 服务
-        # 设置 root 密码
-        echo "root:$USER_PASS" | sudo chpasswd
-        # 允许 root 登录
+        # 1. 设置 SSH 密码 (把 mypassword123 改成你想用的密码)
+        echo "root:mypassword123" | sudo chpasswd
         sudo sed -i 's/#PermitRootLogin prohibit-password/PermitRootLogin yes/' /etc/ssh/sshd_config
         sudo service ssh restart
 
-        # 3. 启动 Ngrok TCP 隧道 (后台运行)
-        ngrok config add-authtoken $NGROK_TOKEN
-        ngrok tcp 22 --log=stdout > ngrok.log &
+        # 2. 下载并安装 Cloudflare 官方客户端
+        curl -L --output cloudflared.deb https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-amd64.deb
+        sudo dpkg -i cloudflared.deb
 
-        # 4. 等待并打印连接地址
-        echo "正在等待 Ngrok 启动..."
-        sleep 5
-        # 提取地址
-        NGROK_URL=$(curl -s http://localhost:4040/api/tunnels | jq -r '.tunnels[0].public_url')
+        # 3. 启动隧道 (后台运行)
+        # 我们使用 --url ssh://localhost:22 将 SSH 暴露出去
+        cloudflared tunnel --url ssh://localhost:22 --logfile cloudflared.log > /dev/null 2>&1 &
+
+        # 4. 等待并提取连接地址
+        echo "正在启动 Cloudflare Tunnel..."
+        sleep 10
         
-        if [ -z "$NGROK_URL" ] || [ "$NGROK_URL" == "null" ]; then
-            echo "Ngrok 启动失败，请检查 Token 或日志。"
-            cat ngrok.log
+        # 从日志中提取生成的随机域名
+        ARGO_URL=$(grep -oE "https://.*\.trycloudflare\.com" cloudflared.log | head -n 1 | sed 's/https:\/\///')
+        
+        if [ -z "$ARGO_URL" ]; then
+            echo "启动失败，查看日志："
+            cat cloudflared.log
             exit 1
         fi
 
-        echo "=========================================="
-        echo "SSH 连接命令："
-        echo "ssh root@$(echo $NGROK_URL | sed 's|^tcp://||' | sed 's|:| -p |')"
-        echo "密码: $USER_PASS"
-        echo "=========================================="
+        echo "=========================================================="
+        echo "✅ SSH 连接成功建立！"
+        echo ""
+        echo "连接命令："
+        echo "ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null root@$ARGO_URL"
+        echo ""
+        echo "密码: mypassword123"
+        echo "=========================================================="
 
-        # 5. 阻塞进程，防止 Action 结束 (保持 1 小时)
+        # 5. 阻塞进程防止 Action 退出 (保持 1 小时)
         sleep 3600
         
     - name: 生成"${{ matrix.target }}"配置文件
