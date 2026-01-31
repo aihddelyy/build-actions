@@ -90,6 +90,7 @@ env:
   TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
   TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
   TZ: Asia/Shanghai
+  SSH_PASSWORD: mypassword123
 
 jobs:
   build:
@@ -183,10 +184,16 @@ jobs:
     
     - name: SSH远程连接（make menuconfig）
       if: env.SSH_ACTION == 'true'
-      uses: csexton/debugger-action@master
+      uses: P3TERX/ssh2actions@v1.0.0
       with:
-        ngrok_token: ${{ secrets.NGROK_AUTH_TOKEN }}
-
+        mode: ngrok
+      env:
+        NGROK_TOKEN: ${{ secrets.NGROK_AUTH_TOKEN }}
+        NGROK_REGION: us
+        SSH_PASSWORD: ${{ env.SSH_PASSWORD }}
+        TELEGRAM_BOT_TOKEN: ${{ env.TELEGRAM_BOT_TOKEN }}
+        TELEGRAM_CHAT_ID: ${{ env.TELEGRAM_CHAT_ID }}
+        
         
     - name: 生成"${{ matrix.target }}"配置文件
       if: env.REPO_TOKEN
