@@ -183,44 +183,13 @@ jobs:
     
     - name: SSH远程连接（make menuconfig）
       if: env.SSH_ACTION == 'true'
-      run: |
-        # 1. 设置 SSH 密码 (把 mypassword123 改成你想用的密码)
-        echo "root:mypassword123" | sudo chpasswd
-        sudo sed -i 's/#PermitRootLogin prohibit-password/PermitRootLogin yes/' /etc/ssh/sshd_config
-        sudo service ssh restart
-
-        # 2. 下载并安装 Cloudflare 官方客户端
-        curl -L --output cloudflared.deb https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-amd64.deb
-        sudo dpkg -i cloudflared.deb
-
-        # 3. 启动隧道 (后台运行)
-        # 我们使用 --url ssh://localhost:22 将 SSH 暴露出去
-        cloudflared tunnel --url ssh://localhost:22 --logfile cloudflared.log > /dev/null 2>&1 &
-
-        # 4. 等待并提取连接地址
-        echo "正在启动 Cloudflare Tunnel..."
-        sleep 10
-        
-        # 从日志中提取生成的随机域名
-        ARGO_URL=$(grep -oE "https://.*\.trycloudflare\.com" cloudflared.log | head -n 1 | sed 's/https:\/\///')
-        
-        if [ -z "$ARGO_URL" ]; then
-            echo "启动失败，查看日志："
-            cat cloudflared.log
-            exit 1
-        fi
-
-        echo "=========================================================="
-        echo "✅ SSH 连接成功建立！"
-        echo ""
-        echo "连接命令："
-        echo "ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null root@$ARGO_URL"
-        echo ""
-        echo "密码: mypassword123"
-        echo "=========================================================="
-
-        # 5. 阻塞进程防止 Action 退出 (保持 1 小时)
-        sleep 3600
+      uses: danshui-git/debugger-action@main
+      with:
+        telegaram_token: ${{ env.TELEGRAM_BOT_TOKEN }}
+        telegaram_id: ${{ env.TELEGRAM_CHAT_ID }}
+        push_token: ${{ env.PUSH_PLUS_TOKEN }}
+        notification_code: ${{ env.INFORMATION_NOTICE }}
+        gh_token: ${{ env.REPO_TOKEN }}
         
     - name: 生成"${{ matrix.target }}"配置文件
       if: env.REPO_TOKEN
