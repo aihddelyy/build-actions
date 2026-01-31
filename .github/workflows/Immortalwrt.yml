@@ -185,7 +185,7 @@ jobs:
       if: env.SSH_ACTION == 'true'
       env:
         NGROK_TOKEN: ${{ secrets.NGROK_AUTH_TOKEN }}
-        USER_PASS: mypassword123 # 设置你的 SSH 密码
+        USER_PASS: mypassword123
       run: |
         # 1. 安装 Ngrok
         curl -s https://ngrok-agent.s3.amazonaws.com/ngrok.asc | sudo tee /etc/apt/trusted.gpg.d/ngrok.asc >/dev/null
