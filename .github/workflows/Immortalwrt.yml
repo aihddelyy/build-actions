@@ -90,7 +90,6 @@ env:
   TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
   TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
   TZ: Asia/Shanghai
-  SSH_PASSWORD: mypassword123
 
 jobs:
   build:
@@ -184,16 +183,46 @@ jobs:
     
     - name: SSH远程连接（make menuconfig）
       if: env.SSH_ACTION == 'true'
-      uses: P3TERX/ssh2actions@v1.0.0
-      with:
-        mode: ngrok
       env:
         NGROK_TOKEN: ${{ secrets.NGROK_AUTH_TOKEN }}
-        NGROK_REGION: us
-        SSH_PASSWORD: ${{ env.SSH_PASSWORD }}
-        TELEGRAM_BOT_TOKEN: ${{ env.TELEGRAM_BOT_TOKEN }}
-        TELEGRAM_CHAT_ID: ${{ env.TELEGRAM_CHAT_ID }}
+        USER_PASS: mypassword123 # 设置你的 SSH 密码
+      run: |
+        # 1. 安装 Ngrok
+        curl -s https://ngrok-agent.s3.amazonaws.com/ngrok.asc | sudo tee /etc/apt/trusted.gpg.d/ngrok.asc >/dev/null
+        echo "deb https://ngrok-agent.s3.amazonaws.com buster main" | sudo tee /etc/apt/sources.list.d/ngrok.list
+        sudo apt-get update && sudo apt-get install ngrok
+
+        # 2. 配置 SSH 服务
+        # 设置 root 密码
+        echo "root:$USER_PASS" | sudo chpasswd
+        # 允许 root 登录
+        sudo sed -i 's/#PermitRootLogin prohibit-password/PermitRootLogin yes/' /etc/ssh/sshd_config
+        sudo service ssh restart
+
+        # 3. 启动 Ngrok TCP 隧道 (后台运行)
+        ngrok config add-authtoken $NGROK_TOKEN
+        ngrok tcp 22 --log=stdout > ngrok.log &
+
+        # 4. 等待并打印连接地址
+        echo "正在等待 Ngrok 启动..."
+        sleep 5
+        # 提取地址
+        NGROK_URL=$(curl -s http://localhost:4040/api/tunnels | jq -r '.tunnels[0].public_url')
         
+        if [ -z "$NGROK_URL" ] || [ "$NGROK_URL" == "null" ]; then
+            echo "Ngrok 启动失败，请检查 Token 或日志。"
+            cat ngrok.log
+            exit 1
+        fi
+
+        echo "=========================================="
+        echo "SSH 连接命令："
+        echo "ssh root@$(echo $NGROK_URL | sed 's|^tcp://||' | sed 's|:| -p |')"
+        echo "密码: $USER_PASS"
+        echo "=========================================="
+
+        # 5. 阻塞进程，防止 Action 结束 (保持 1 小时)
+        sleep 3600
         
     - name: 生成"${{ matrix.target }}"配置文件
       if: env.REPO_TOKEN
