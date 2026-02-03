@@ -392,9 +392,3 @@ CONFIG_boost-runtime-shared=y
 CONFIG_boost-static-and-shared-libs=y
 CONFIG_boost-variant-release=y
 CONFIG_shadow-all=y
-# CONFIG_PACKAGE_rust is not set
-# CONFIG_PACKAGE_rustc is not set
-# CONFIG_PACKAGE_cargo is not set
-# CONFIG_PACKAGE_libstd-rs is not set
-# CONFIG_PACKAGE_python3-cryptography is not set
-# CONFIG_PACKAGE_python3-openssl is not set
