@@ -40,7 +40,7 @@ export Customized_Information="$(TZ=UTC-8 date "+%Y-%m-%d") Bulid By Aihdde"  # 
 export Replace_Kernel="6.6"                    # 更换内核版本,在对应源码的[target/linux/架构]查看patches-x.x,看看x.x有啥就有啥内核了(填入内核x.x版本号,填0为不作修改)
 
 # 设置免密码登录(个别源码本身就没密码的)
-export Password_free_login="1"               # 设置首次登录后台密码为空（进入openwrt后自行修改密码）(1为启用命令,填0为不作修改)
+export Password_free_login="0"               # 设置首次登录后台密码为空（进入openwrt后自行修改密码）(1为启用命令,填0为不作修改)
 
 # 增加AdGuardHome插件和核心
 export AdGuardHome_Core="1"                  # 编译固件时自动增加AdGuardHome插件和AdGuardHome插件核心,需要注意的是一个核心20多MB的,小闪存机子搞不来(1为启用命令,填0为不作修改)
@@ -71,10 +71,10 @@ grep -rl '"终端"' . | xargs -r sed -i 's?"终端"?"TTYD"?g'
 grep -rl '"TTYD 终端"' . | xargs -r sed -i 's?"TTYD 终端"?"TTYD"?g'
 grep -rl '"网络存储"' . | xargs -r sed -i 's?"网络存储"?"NAS"?g'
 grep -rl '"实时流量监测"' . | xargs -r sed -i 's?"实时流量监测"?"流量"?g'
-grep -rl '"KMS 服务器"' . | xargs -r sed -i 's?"KMS 服务器"?"KMS激活"?g'
+grep -rl 'Vlmcsd KMS 服务器' . | xargs -r sed -i 's?Vlmcsd KMS 服务器?KMS激活?g'
 grep -rl '"USB 打印服务器"' . | xargs -r sed -i 's?"USB 打印服务器"?"打印服务"?g'
 grep -rl '"Web 管理"' . | xargs -r sed -i 's?"Web 管理"?"Web管理"?g'
-grep -rl '"管理权"' . | xargs -r sed -i 's?"管理权"?"改密码"?g'
+#grep -rl '"管理权"' . | xargs -r sed -i 's?"管理权"?"改密码"?g'
 grep -rl '"带宽监控"' . | xargs -r sed -i 's?"带宽监控"?"监控"?g'
 
 
