@@ -27,7 +27,7 @@ jobs:
   build:
     name: 编译 "${{matrix.target}}"
     runs-on: ubuntu-24.04
-    if: ${{ github.event.repository.owner.id }} == ${{ github.event.sender.id }}
+    if: ${{ github.event.repository.owner.id == github.event.sender.id }}
     
     env:
       FOLDER_NAME: ${{ matrix.target }}
@@ -59,11 +59,9 @@ jobs:
         remove_haskell: true
         remove_tool_cache: true
         remove_swap: true
-        remove_docker: true
+        remove_docker_image: true
         remove_packages: "azure-cli google-cloud-cli microsoft-edge-stable google-chrome-stable firefox postgresql* temurin-* *llvm* mysql* dotnet-sdk-*"
-        remove_packages_one_command: true
         remove_folders: "/usr/share/swift /usr/share/miniconda /usr/share/az* /usr/share/glade* /usr/local/lib/node_modules /usr/local/share/chromium /usr/local/share/powershell"
-        testing: false
         
     - name: 部署编译环境
       env:
