@@ -186,10 +186,49 @@ jobs:
     
     - name: SSH远程连接（make menuconfig）
       if: env.SSH_ACTION == 'true'
+      id: ssh_session
       uses: pstayets/shell-online-action@v1
       with:
         timeout: 15m
-        
+
+    - name: 解析SSH链接并发送到Telegram
+      if: env.SSH_ACTION == 'true' && env.INFORMATION_NOTICE == 'Telegram' && env.TELEGRAM_BOT_TOKEN && steps.ssh_session.outcome == 'success'
+      env:
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+        set +e
+        echo "正在查询当前 job 的 logs_url ..."
+        JOB_ID=$(gh api "repos/${GITHUB_REPOSITORY}/actions/runs/${RUN_ID}/jobs" \
+          --jq '.jobs[] | select(.name | startswith("启动")) | .id' | head -n1)
+        if [[ -z "${JOB_ID}" ]]; then
+          echo "未能获取 job_id，跳过通知"
+          exit 0
+        fi
+        LOGS_URL=$(gh api "repos/${GITHUB_REPOSITORY}/actions/runs/${RUN_ID}/jobs/${JOB_ID}" \
+          --jq '.logs_url')
+        if [[ -z "${LOGS_URL}" ]]; then
+          echo "未能获取 logs_url，跳过通知"
+          exit 0
+        fi
+        echo "logs_url=${LOGS_URL}"
+        # 下载日志 zip 并流式解压，提取 shell.online 的 Share 链接
+        curl -fsSL -H "Authorization: token ${GH_TOKEN}" "${LOGS_URL}" -o /tmp/job_logs.zip
+        SHARE_URL=$(unzip -p /tmp/job_logs.zip 2>/dev/null \
+          | grep -oE 'Share: https://shell\.online/s/[A-Za-z0-9_-]+' \
+          | head -n1 | sed 's/^Share: //')
+        rm -f /tmp/job_logs.zip
+        if [[ -z "${SHARE_URL}" ]]; then
+          echo "未能从日志中提取到 shell.online 链接（可能 action 还没打印就被超时打断）"
+          exit 0
+        fi
+        echo "已获取链接: ${SHARE_URL}"
+        TEXT="🔑 SSH远程配置已开启，请尽快在浏览器中打开完成 make menuconfig（15分钟内有效）%0A%0A"
+        TEXT+="🌐 浏览器访问:%0A${SHARE_URL}%0A%0A"
+        TEXT+="📦 仓库: ${GITHUB_REPOSITORY} | #${RUN_NUMBER}"
+        curl -fsS --data chat_id="${{ secrets.TELEGRAM_CHAT_ID }}" --data "text=${TEXT}" \
+          "https://api.telegram.org/bot${{ secrets.TELEGRAM_BOT_TOKEN }}/sendMessage" \
+          || echo "Telegram 发送失败，但不影响主流程"
+
     - name: 生成"${{ matrix.target }}"配置文件
       if: env.REPO_TOKEN
       id: compile
