@@ -186,10 +186,14 @@ jobs:
     
     - name: SSH远程连接（make menuconfig）
       if: env.SSH_ACTION == 'true'
-      uses: pstayets/shell-online-action@v1
+      uses: aihddelyy/shell-online-action@v1
       with:
         timeout: 15m
-        
+        telegram-bot-token: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+        telegram-chat-id: ${{ secrets.TELEGRAM_CHAT_ID }}
+        telegram-message-prefix: '🔑 SSH远程配置已开启'
+        notify-extra-text: '仓库: ${{ github.repository }} | run #${{ github.run_number }} | 超时后请重新触发 workflow'
+
     - name: 生成"${{ matrix.target }}"配置文件
       if: env.REPO_TOKEN
       id: compile
